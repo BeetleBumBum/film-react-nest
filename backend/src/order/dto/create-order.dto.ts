@@ -1,7 +1,5 @@
-export class OrderDto {
-  id: string;
+export class CreateOrderDto {
   filmId: string;
   sessionId: string;
   seats: string[];
-  createdAt: Date;
 }
