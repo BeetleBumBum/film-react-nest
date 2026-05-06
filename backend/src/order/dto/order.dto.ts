@@ -1,7 +1,0 @@
-export class OrderDto {
-  id: string;
-  filmId: string;
-  sessionId: string;
-  seats: string[];
-  createdAt: Date;
-}

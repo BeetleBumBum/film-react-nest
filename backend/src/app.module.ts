@@ -6,6 +6,7 @@ import * as path from 'node:path';
 import { configProvider } from './app.config.provider';
 import { FilmsModule } from './films/films.module';
 import { OrderModule } from './order/order.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -13,9 +14,9 @@ import { OrderModule } from './order/order.module';
       isGlobal: true,
       cache: true,
     }),
+    DatabaseModule,
     FilmsModule,
     OrderModule,
-    // @todo: Добавьте раздачу статических файлов из public ✅
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, '../public'),
       serveRoot: '/',

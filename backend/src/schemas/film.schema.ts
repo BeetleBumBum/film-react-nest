@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import { Schema } from 'mongoose';
 import { FilmDto, ScheduleDto } from '../films/dto/films.dto';
 
 const scheduleSchema = new Schema<ScheduleDto>({
@@ -100,4 +100,4 @@ const filmSchema = new Schema<FilmDto>({
   },
 });
 
-export const FilmModel = mongoose.model<FilmDto>('Film', filmSchema);
+export const FilmSchema = filmSchema;
