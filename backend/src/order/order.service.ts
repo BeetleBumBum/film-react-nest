@@ -3,55 +3,54 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { FilmDto } from '../films/dto/films.dto';
 import { randomUUID } from 'crypto';
+import { OrderRepository } from '../repository/order.repository';
+import { CreateOrderDto } from './dto/create-order.dto';
 
 @Injectable()
 export class OrderService {
-  constructor(@InjectModel('Film') private filmModel: Model<FilmDto>) {}
+  constructor(private readonly orderRepository: OrderRepository) {}
 
-  async createOrder(film: string, session: string, row: number, seat: number) {
-    const seatNumber = `${row}:${seat}`;
+  async createOrder(createOrderDto: CreateOrderDto) {
+    const { tickets } = createOrderDto;
 
-    const updatedFilm = await this.filmModel.findOneAndUpdate(
-      {
-        id: film,
-        'schedule.id': session,
-        'schedule.taken': { $ne: seatNumber },
-      },
-      {
-        $push: { 'schedule.$.taken': seatNumber },
-      },
-      { new: true },
+    const film = tickets[0].film;
+    const session = tickets[0].session;
+
+    const foundFilm = await this.orderRepository.findFilmById(film);
+    if (!foundFilm) {
+      throw new NotFoundException(`Фильм ${film} не найден`);
+    }
+
+    const foundSession = foundFilm.schedule.find((s) => s.id === session);
+    if (!foundSession) {
+      throw new NotFoundException(`Сеанс ${session} не найден`);
+    }
+
+    const seatNumbers = tickets.map((t) => `${t.row}:${t.seat}`);
+
+    const updatedFilm = await this.orderRepository.addTakenSeat(
+      film,
+      session,
+      seatNumbers,
     );
 
     if (!updatedFilm) {
-      const foundFilm = await this.filmModel.findOne({ id: film });
-      if (!foundFilm) {
-        throw new NotFoundException(`Фильм ${film} не найден`);
-      }
-
-      const foundSession = foundFilm.schedule.find((s) => s.id === session);
-
-      if (!foundSession) {
-        throw new NotFoundException(`Сеанс ${session} не найден`);
-      }
-
-      throw new ConflictException(`Место ${row}:${seat} уже занято`);
+      throw new ConflictException('Выбранные места заняты');
     }
 
     const updatedSession = updatedFilm.schedule.find((s) => s.id === session);
 
-    return {
+    const items = tickets.map((ticket) => ({
       id: randomUUID(),
-      film: film,
-      session: session,
-      row: row,
-      seat: seat,
+      film: ticket.film,
+      session: ticket.session,
+      row: ticket.row,
+      seat: ticket.seat,
       daytime: updatedSession.daytime,
       price: updatedSession.price,
-    };
+    }));
+
+    return { total: items.length, items };
   }
 }
