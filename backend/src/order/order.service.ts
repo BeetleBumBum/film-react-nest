@@ -22,7 +22,7 @@ export class OrderService {
       throw new NotFoundException(`Фильм ${film} не найден`);
     }
 
-    const foundSession = foundFilm.schedule.find((s) => s.id === session);
+    const foundSession = foundFilm.schedules.find((s) => s.id === session);
     if (!foundSession) {
       throw new NotFoundException(`Сеанс ${session} не найден`);
     }
@@ -39,7 +39,7 @@ export class OrderService {
       throw new ConflictException('Выбранные места заняты');
     }
 
-    const updatedSession = updatedFilm.schedule.find((s) => s.id === session);
+    const updatedSession = updatedFilm.schedules.find((s) => s.id === session);
 
     const items = tickets.map((ticket) => ({
       id: randomUUID(),
