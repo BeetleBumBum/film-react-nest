@@ -35,8 +35,11 @@ export class OrderRepository {
       }
 
       const currentTakenSeats: string[] = schedule.taken
-        ? schedule.taken.split(',').filter((s) => s !== '')
+        ? (schedule.taken as unknown as string)
+            .split(',')
+            .filter((s) => s !== '')
         : [];
+
       const isSeatTaken = seatNumbers.some((seat) =>
         currentTakenSeats.includes(seat),
       );
@@ -50,7 +53,7 @@ export class OrderRepository {
       await queryRunner.manager.update(
         Schedule,
         { id: session },
-        { taken: updatedTaken.join(',') },
+        { taken: updatedTaken.join(',') as unknown as string[] },
       );
 
       await queryRunner.commitTransaction();

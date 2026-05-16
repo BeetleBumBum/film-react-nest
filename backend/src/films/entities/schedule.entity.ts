@@ -28,7 +28,7 @@ export class Schedule {
   price: number;
 
   @Column('text')
-  taken: string;
+  taken: string[];
 
   @Column({ name: 'filmId' })
   filmId: string;

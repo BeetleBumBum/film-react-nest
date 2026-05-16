@@ -13,7 +13,7 @@ export class Film {
   director: string;
 
   @Column('text')
-  tags: string;
+  tags: string[];
 
   @Column()
   image: string;
