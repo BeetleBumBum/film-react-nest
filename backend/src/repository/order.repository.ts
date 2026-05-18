@@ -1,27 +1,68 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { FilmDto } from '../films/dto/films.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Film } from '../films/entities/film.entity';
+import { Schedule } from '../films/entities/schedule.entity';
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class OrderRepository {
-  constructor(@InjectModel('Film') private filmModel: Model<FilmDto>) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    @InjectRepository(Film) private filmRepository: Repository<Film>,
+    @InjectRepository(Schedule)
+    private scheduleRepository: Repository<Schedule>,
+  ) {}
 
   async findFilmById(id: string) {
-    return this.filmModel.findOne({ id });
+    return this.filmRepository.findOne({
+      where: { id },
+      relations: ['schedules'],
+    });
   }
 
   async addTakenSeat(film: string, session: string, seatNumbers: string[]) {
-    return this.filmModel.findOneAndUpdate(
-      {
-        id: film,
-        'schedule.id': session,
-        'schedule.taken': { $not: { $elemMatch: { $in: seatNumbers } } },
-      },
-      {
-        $addToSet: { 'schedule.$.taken': { $each: seatNumbers } },
-      },
-      { new: true },
-    );
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const schedule = await queryRunner.manager.findOne(Schedule, {
+        where: { id: session, filmId: film },
+      });
+
+      if (!schedule) {
+        return null;
+      }
+
+      const currentTakenSeats: string[] = schedule.taken || [];
+
+      const isSeatTaken = seatNumbers.some((seat) =>
+        currentTakenSeats.includes(seat),
+      );
+
+      if (isSeatTaken) {
+        return null;
+      }
+
+      const updatedTaken = [...currentTakenSeats, ...seatNumbers];
+
+      await queryRunner.manager.update(
+        Schedule,
+        { id: session },
+        { taken: updatedTaken },
+      );
+
+      await queryRunner.commitTransaction();
+
+      return this.filmRepository.findOne({
+        where: { id: film },
+        relations: ['schedules'],
+      });
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
