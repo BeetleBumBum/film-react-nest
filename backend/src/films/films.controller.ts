@@ -15,6 +15,6 @@ export class FilmsController {
   async findSchedule(@Param('id') id: string) {
     const film = await this.filmsService.findSchedule(id);
 
-    return { total: film.schedule.length, items: film.schedule };
+    return { total: film.schedules.length, items: film.schedules };
   }
 }

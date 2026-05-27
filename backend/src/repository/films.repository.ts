@@ -1,17 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { FilmDto } from '../films/dto/films.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Film } from '../films/entities/film.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class FilmsRepository {
-  constructor(@InjectModel('Film') private filmModel: Model<FilmDto>) {}
+  constructor(
+    @InjectRepository(Film) private filmRepository: Repository<Film>,
+  ) {}
 
   async findAll() {
-    return await this.filmModel.find();
+    return await this.filmRepository.find();
   }
 
   async findById(id: string) {
-    return this.filmModel.findOne({ id });
+    return this.filmRepository.findOne({
+      where: { id },
+      relations: ['schedules'],
+    });
   }
 }
