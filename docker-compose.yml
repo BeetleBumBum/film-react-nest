@@ -1,0 +1,80 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: ghcr.io/beetlebumbum/film-react-nest-backend:review-2
+    container_name: film-backend
+    ports: 
+      - "3000:3000"
+    environment:
+      DATABASE_DRIVER: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: films
+      DATABASE_USERNAME: prac
+      DATABASE_PASSWORD: prac
+      DEBUG: "*"
+      LOGGER_FORMAT: json
+    networks:
+      - film-network
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    env_file: 
+      - ./backend/.env  
+
+  postgres:
+    image: "postgres:16"
+    container_name: film-postgres
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_DB: films
+      POSTGRES_USER: prac
+      POSTGRES_PASSWORD: prac
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/pgdata
+    networks:
+      - film-network
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: film-pgadmin
+    environment: 
+      PGADMIN_DEFAULT_EMAIL: admin@ya.ru
+      PGADMIN_DEFAULT_PASSWORD: 1234
+    volumes: 
+      - pgadmin_data:/var/lib/pgadmin
+    ports: 
+      - "8080:80"
+    networks: 
+      - film-network
+    restart: unless-stopped
+    depends_on: 
+      - postgres 
+
+  nginx:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    image: ghcr.io/beetlebumbum/film-react-nest-nginx:review-2
+    container_name: film-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:                                       
+      - /etc/letsencrypt/:/etc/letsencrypt/:ro  
+    networks:
+      - film-network
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  film-network:
+    driver: bridge
