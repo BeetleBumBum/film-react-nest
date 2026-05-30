@@ -43,9 +43,6 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      # - name: Build frontend
-      #   run: cd frontend && npm ci && npm install @rollup/rollup-linux-x64-gnu --save-optional && npm run build
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 

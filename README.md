@@ -31,6 +31,14 @@ MongoDB должна быть установлена и запущена.
 
 Для проверки отправьте тестовый запрос с помощью Postman или `curl`.
 
-
+## Ссылки на задеплоенный проект
+### Сайт:
+https://beetle-film.nomorepartiessite.ru
+### Бэкенд:
+https://beetle-film.nomorepartiessite.ru:3000/api/afisha/films/
+### pgAdmin:
+https://beetle-film.nomorepartiessite.ru:8080
+Логин: admin@ya.ru
+Пароль: 1234
 
 

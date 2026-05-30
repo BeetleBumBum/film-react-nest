@@ -21,12 +21,8 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
-    healthcheck:
-      test: "wget -nv -t1 --spider 'http://localhost:3000/'"
-      interval: 1m30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s  
+    env_file: 
+      - ./backend/.env  
 
   postgres:
     image: "postgres:16"
@@ -61,11 +57,14 @@ services:
   nginx:
     build:
       context: .
-      dockerfile: nginx/Dockerfile
+      dockerfile: frontend/Dockerfile
     image: ghcr.io/beetlebumbum/film-react-nest-nginx:review-2
     container_name: film-nginx
     ports:
       - "80:80"
+      - "443:443"
+    volumes:                                       
+    - /etc/letsencrypt/:/etc/letsencrypt/:ro  
     networks:
       - film-network
     restart: unless-stopped
