@@ -3,7 +3,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: ghcr.io/beetlebumbum/film-react-nest-backend:latest
+    image: ghcr.io/beetlebumbum/film-react-nest-backend:review-2
     container_name: film-backend
     environment:
       DATABASE_DRIVER: postgres
@@ -60,7 +60,7 @@ services:
     build:
       context: .
       dockerfile: nginx/Dockerfile
-    image: ghcr.io/beetlebumbum/film-react-nest-nginx:latest
+    image: ghcr.io/beetlebumbum/film-react-nest-nginx:review-2
     container_name: film-nginx
     ports:
       - "80:80"
