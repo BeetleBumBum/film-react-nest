@@ -8,7 +8,7 @@ RUN npm ci
 # для alpine
 RUN npm install @rollup/rollup-linux-x64-musl
 
-COPY . .
+COPY frontend/ ./
 RUN npm run build
 
 FROM nginx:alpine
