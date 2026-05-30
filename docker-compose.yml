@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     image: ghcr.io/beetlebumbum/film-react-nest-backend:review-2
     container_name: film-backend
+    ports: 
+      - "3000:3000"
     environment:
       DATABASE_DRIVER: postgres
       DATABASE_HOST: postgres
